@@ -1,0 +1,24 @@
+{
+  "name": "mumblemusicbot",
+  "version": "0.0.1",
+  "description": "The bot to lighten that mumble channel up!",
+  "main": "index.js",
+  "dependencies": {
+    "grooveshark-streaming": "0.0.8",
+    "mumble": "0.0.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node index test"
+  },
+  "keywords": [
+    "mumble",
+    "music",
+    "bot",
+    "lounge",
+    "relax",
+    "listening"
+  ],
+  "author": "Bram van der Veen",
+  "license": "MIT"
+}
