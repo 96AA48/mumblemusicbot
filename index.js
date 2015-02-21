@@ -4,6 +4,7 @@ var GS = require('grooveshark-streaming');
 var fs = require('fs');
 var http = require('http');
 var lame = require('lame');
+var wav = require('wav');
 
 var connection;
 
@@ -25,8 +26,8 @@ mumble.connect('mumble://wallpiece:9648', options, function (err, res) {
 		// var decoder = new lame.Decoder();
 
 		// fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(res.inputStream());
+		play();
 	});
-
 	// message('Hey there, I\'m music bot!');
 
 
@@ -83,7 +84,25 @@ function play(song) {
 	var speaker = new require('speaker')();
 	var decoder = new lame.Decoder();
 	
-	fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(connection.inputStream());
+	var spawn = require('child_process').spawn;
+	var speex = spawn('speexenc', ['-', '-', '--rate 48000', '--16bit']);
+
+	fs.createReadStream(__dirname + '/song.mp3').pipe(decoder);//.pipe(speex.stdin);
+
+
+	decoder.on('format', onFormat);
+
+	function onFormat (format) {
+		console.error('MP3 format: %j', format);
+
+		// write the decoded MP3 data into a WAV file
+		var writer = new wav.Writer(format);
+		decoder.pipe(writer).pipe(speex.stdin);
+	}
+	
+	speex.stdout.pipe(connection.inputStream());
+
+	// enogg.pipe(speaker);
 
 	// fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(speaker);
 }
