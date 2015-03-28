@@ -5,6 +5,7 @@ var fs = require('fs');
 var http = require('http');
 var lame = require('lame');
 var wav = require('wav');
+var celt = require('celt');
 
 var connection;
 
@@ -25,8 +26,9 @@ mumble.connect('mumble://wallpiece:9648', options, function (err, res) {
 		// var speaker = new require('speaker')();
 		// var decoder = new lame.Decoder();
 
-		// fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(res.inputStream());
-		play();
+		// fs.createReadStream(__dirname + '/song.mp3')/*.pipe(decoder)*/.pipe(res.inputStream());
+		res.outputStream().pipe(res.inputStream());
+
 	});
 	// message('Hey there, I\'m music bot!');
 
@@ -59,6 +61,7 @@ function grooveshark(command) {
 	GS.Tinysong.getSongInfo(lookup, null, function (err, info) {
 		GS.Grooveshark.getStreamingUrl(info.SongID, function (err, url) {
 			if (fs.existsSync(__dirname + '/song.mp3')) fs.unlinkSync(__dirname + '/song.mp3');
+			if (fs.existsSync(__dirname + '/song.wav')) fs.unlinkSync(__dirname + '/song.wav');
 			message('Got the song, downloading it now!');
 			http.get(url, function (res) {
 
@@ -80,29 +83,16 @@ function grooveshark(command) {
 	});
 }
 
-function play(song) {
+function play(output) {
 	var speaker = new require('speaker')();
 	var decoder = new lame.Decoder();
-	
 	var spawn = require('child_process').spawn;
-	var speex = spawn('speexenc', ['-', '-', '--rate 48000', '--16bit']);
+	var speex = spawn('speexenc', ['-', '-', '--16bit'/*, '-u'*/]);
 
-	fs.createReadStream(__dirname + '/song.mp3').pipe(decoder);//.pipe(speex.stdin);
+	fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(speex.stdin);
 
+	speex.stderr.on('data', function (data) {console.log(data.toString())});
 
-	decoder.on('format', onFormat);
+	speex.stdout.pipe(speaker);
 
-	function onFormat (format) {
-		console.error('MP3 format: %j', format);
-
-		// write the decoded MP3 data into a WAV file
-		var writer = new wav.Writer(format);
-		decoder.pipe(writer).pipe(speex.stdin);
-	}
-	
-	speex.stdout.pipe(connection.inputStream());
-
-	// enogg.pipe(speaker);
-
-	// fs.createReadStream(__dirname + '/song.mp3').pipe(decoder).pipe(speaker);
 }
