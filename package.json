@@ -4,8 +4,7 @@
   "description": "The bot to lighten that mumble channel up!",
   "main": "index.js",
   "dependencies": {
-    "grooveshark-streaming": "0.0.8",
-    "mumble": "0.0.2"
+    "mumble": "^0.1.4"
   },
   "devDependencies": {},
   "scripts": {
