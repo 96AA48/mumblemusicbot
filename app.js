@@ -45,9 +45,16 @@ var start = function(client) {
         }
       }
       else if (command[0] == '/play') {
-        if (command[1]) {
-          if (command[1].substr(0,6) == 'http://' || command[1].substr(0, 7) == 'https://') {
 
+        command[1] = command.splice(1).join(' ').replace(/\<.*\"\>|\<\/.*\>/g, '');
+
+        if (command[1]) {
+          if (command[1].substr(0,7) == 'http://' || command[1].substr(0, 8) == 'https://') {
+            dl.exec(command[1], ['-x', '--audio-format', 'mp3', '-o', 'music/%(title)s.%(ext)s'], {}, function (err, output) {
+              if (err) throw err;
+              console.log(output)
+              play(client, output[3].split('music/')[1].replace(/\.m4a/g, ''));
+            });
           }
           else if (command[1] == 'offline') {
           }
